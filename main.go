@@ -28,21 +28,15 @@ var (
 
 func execRoot(cmd *cobra.Command, args []string) error {
 	ap := addr + ":" + port
-	if ap == ":" {
-		cmd.Usage()
-		os.Exit(0)
-	}
 
 	udpServer, err := net.ResolveUDPAddr("udp", ap)
 	if err != nil {
-		println("ResolveUDPAddr failed:", err.Error())
-		os.Exit(1)
+		return err
 	}
 
 	conn, err := net.DialUDP("udp", nil, udpServer)
 	if err != nil {
-		println("Listen failed:", err.Error())
-		os.Exit(1)
+		return err
 	}
 	defer conn.Close()
 
@@ -100,6 +94,9 @@ func main() {
 
 	cmdRoot.Flags().StringVarP(&addr, "addr", "a", "", "UDP address to target")
 	cmdRoot.Flags().StringVarP(&port, "port", "p", "", "UDP port to target")
+
+	cmdRoot.MarkFlagRequired("addr")
+	cmdRoot.MarkFlagRequired("port")
 
 	if err := cmdRoot.Execute(); err != nil {
 		fmt.Println(err)
